@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using FluentNHibernate.Conventions.Helpers;
@@ -13,7 +14,7 @@ namespace site.Models.NHibernate {
             return configuration.BuildConfiguration().BuildSessionFactory();
         }
 
-        public string ObtemCnnString() {
+        protected virtual string ObtemCnnString() {
             return ConfigurationManager.ConnectionStrings["bd"].ConnectionString;
         }
 
@@ -29,5 +30,7 @@ namespace site.Models.NHibernate {
                 .Conventions.Setup(x => x.Add(AutoImport.Never()))
                 .AddFromAssemblyOf<Funcionario>());
         }
+
+        
     }
 }

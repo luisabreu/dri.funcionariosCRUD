@@ -5,6 +5,13 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "site", "site\site.csproj", "{826F28A9-3AC2-47C5-B7C4-ADC9A2358D32}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "site.tests", "site.tests\site.tests.csproj", "{B50DD79F-3EFB-44D0-90AB-04F1453DD385}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{06E0D078-D304-4FBF-8528-99EAE187B010}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +22,10 @@ Global
 		{826F28A9-3AC2-47C5-B7C4-ADC9A2358D32}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{826F28A9-3AC2-47C5-B7C4-ADC9A2358D32}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{826F28A9-3AC2-47C5-B7C4-ADC9A2358D32}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B50DD79F-3EFB-44D0-90AB-04F1453DD385}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B50DD79F-3EFB-44D0-90AB-04F1453DD385}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B50DD79F-3EFB-44D0-90AB-04F1453DD385}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B50DD79F-3EFB-44D0-90AB-04F1453DD385}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
