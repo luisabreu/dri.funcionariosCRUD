@@ -64,6 +64,12 @@
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
+    <Reference Include="Moq">
+      <HintPath>..\packages\Moq.Contrib.0.3\lib\Moq.dll</HintPath>
+    </Reference>
+    <Reference Include="Moq.Contrib">
+      <HintPath>..\packages\Moq.Contrib.0.3\lib\Moq.Contrib.dll</HintPath>
+    </Reference>
     <Reference Include="MvcRouteTester">
       <HintPath>..\packages\MvcRouteTester.1.2.1\lib\net40\MvcRouteTester.dll</HintPath>
       <Private>True</Private>
@@ -136,6 +142,7 @@
     <Compile Include="Models\NHibernate\AuxiliarTransacao.cs" />
     <Compile Include="Models\NHibernate\MapeamentoFuncionario.cs" />
     <Compile Include="Models\NHibernate\MapeamentoTipoFuncionario.cs" />
+    <Compile Include="Models\ViewModel\FuncionalidadesRepositorioFuncionarios.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
