@@ -6,19 +6,27 @@ using System.Net.Mail;
 using System.Text.RegularExpressions;
 using System.Web.Mvc;
 using NHibernate;
-using NHibernate.Criterion;
 using site.Models;
 using site.Models.ViewModel;
 
 namespace site.Controllers {
     public class HomeController : Controller {
         private static Regex _nifRegex = new Regex(@"^\d{9}$");
+        private readonly RepositorioFuncionarios _repositorioFuncionarios;
+        private readonly RepositorioTiposFuncionario _repositorioTiposFuncionario;
         private readonly ISession _session;
 
-        public HomeController(ISession session) {
+        public HomeController(ISession session,
+            RepositorioFuncionarios repositorioFuncionarios,
+            RepositorioTiposFuncionario repositorioTiposFuncionario) {
             Contract.Requires(session != null);
+            Contract.Requires(repositorioFuncionarios != null);
+            Contract.Requires(repositorioTiposFuncionario != null);
             Contract.Ensures(_session != null);
+            Contract.Ensures(_repositorioFuncionarios != null);
             _session = session;
+            _repositorioFuncionarios = repositorioFuncionarios;
+            _repositorioTiposFuncionario = repositorioTiposFuncionario;
         }
 
         public ActionResult Index(string nifOuNome) {
@@ -26,12 +34,8 @@ namespace site.Controllers {
                 return View(new DadosPesquisa {NifOuNome = ""});
             }
             using (var tran = _session.BeginTransaction()) {
-                var query = _session.QueryOver<Funcionario>();
-                query = ENif(nifOuNome)
-                    ? query.Where(f => f.Nif == nifOuNome)
-                    : query.Where(f => f.Nome.IsLike("%" + nifOuNome.Replace(" ", "%") + "%"));
                 return View(new DadosPesquisa {
-                    Funcionarios = query.List<Funcionario>(),
+                    Funcionarios = _repositorioFuncionarios.Pesquisa(nifOuNome),
                     NifOuNome = nifOuNome,
                     PesquisaEfetuada = true
                 });
@@ -39,30 +43,23 @@ namespace site.Controllers {
         }
 
         public ActionResult NovoFuncionario() {
-            IEnumerable<TipoFuncionario> tipos = null;
             using (var tran = _session.BeginTransaction()) {
-                tipos = _session.QueryOver<TipoFuncionario>()
-                    .List<TipoFuncionario>();
+                var tipos = _repositorioTiposFuncionario.ObtemTodosTipos();
+                var funcionario = Funcionario.CriaVazio(tipos.First());
+
+                return View("fichafuncionario", new DadosFichaFormulario {
+                    ENovo = true,
+                    Funcionario = funcionario,
+                    TiposFuncionario = tipos
+                });
             }
-            var funcionario = new Funcionario {
-                Contactos = new List<Contacto>(),
-                IdFuncionario = 0,
-                Nif = "",
-                Nome = "",
-                TipoFuncionario = tipos.FirstOrDefault(),
-                Versao = 0
-            };
-            return View("fichafuncionario", new DadosFichaFormulario {
-                ENovo = true,
-                Funcionario = funcionario,
-                TiposFuncionario = tipos
-            });
         }
 
         public ActionResult FichaFuncionario(int id) {
             using (var tran = _session.BeginTransaction()) {
-                var funcionario = _session.Load<Funcionario>(id);
-                var tipos = _session.QueryOver<TipoFuncionario>().List<TipoFuncionario>();
+                var funcionario = _repositorioFuncionarios.ObtemFuncionario(id);
+                var tipos = _repositorioTiposFuncionario.ObtemTodosTipos();
+
                 return View("fichafuncionario", new DadosFichaFormulario {
                     ENovo = false,
                     Funcionario = funcionario,
@@ -79,24 +76,26 @@ namespace site.Controllers {
 
         private ActionResult ModificaDadosGerais(int id, int versao, string nome, string nif, int tipoFuncionario) {
             using (var tran = _session.BeginTransaction()) {
-                var tipos = _session.QueryOver<TipoFuncionario>()
-                    .List<TipoFuncionario>();
+                var tipos = _repositorioTiposFuncionario.ObtemTodosTipos();
                 var tipo = tipos.First(tf => tf.Id == tipoFuncionario);
-                var funcionario = _session.Load<Funcionario>(id);
+
+                var funcionario = _repositorioFuncionarios.ObtemFuncionario(id);
                 Contract.Assume(funcionario != null);
 
                 funcionario.Nif = nif;
                 funcionario.Nome = nome;
                 funcionario.TipoFuncionario = tipo;
 
-                if (NifDuplicado(nif, 0)) {
-                    ModelState.AddModelError("nif", "NIF já foi associado a outro contribuinte");
-                }
-                else {
-                    _session.SaveOrUpdate(funcionario);
+                try {
+                    _repositorioFuncionarios.Grava(funcionario);
                     tran.Commit();
                 }
-                
+                catch (InvalidOperationException) {
+                    ModelState.AddModelError("nif", "NIF já foi associado a outro contribuinte");
+                }
+
+               
+
                 return View("fichafuncionario", new DadosFichaFormulario {
                     ENovo = false,
                     Funcionario = funcionario,
@@ -107,10 +106,8 @@ namespace site.Controllers {
 
         private ActionResult AdicionaNovoFuncionario(string nome, string nif, int tipoFuncionario) {
             using (var tran = _session.BeginTransaction()) {
-
                 var ocorreuErro = false;
-                var tipos = _session.QueryOver<TipoFuncionario>()
-                    .List<TipoFuncionario>();
+                var tipos = _repositorioTiposFuncionario.ObtemTodosTipos();
                 var tipo = tipos.First(tf => tf.Id == tipoFuncionario);
                 var funcionario = new Funcionario {
                     Nome = nome,
@@ -118,12 +115,14 @@ namespace site.Controllers {
                     TipoFuncionario = tipo,
                     Contactos = new List<Contacto>()
                 };
-                if (ocorreuErro = NifDuplicado(nif, 0)){
-                    ModelState.AddModelError("nif", "NIF já foi associado a outro contribuinte");
-                }
-                else {
-                    _session.SaveOrUpdate(funcionario);
+
+                try {
+                    _repositorioFuncionarios.Grava(funcionario);
                     tran.Commit();
+                }
+                catch (InvalidOperationException) {
+                    ModelState.AddModelError("nif", "NIF já foi associado a outro contribuinte");
+                    ocorreuErro = true;
                 }
                 return View("fichafuncionario", new DadosFichaFormulario {
                     ENovo = ocorreuErro,
@@ -133,21 +132,19 @@ namespace site.Controllers {
             }
         }
 
-        private bool NifDuplicado(string nif, int id) {
-            var total = _session.QueryOver<Funcionario>()
-                .Where(f => f.Nif == nif && f.IdFuncionario != id)
-                .RowCount();
-            return total > 0;
-        }
+        
 
         public ActionResult AdicionaContacto(int id, int versao, string contacto) {
             using (var tran = _session.BeginTransaction()) {
-                var funcionario = _session.Load<Funcionario>(id);
+                var tipos = _repositorioTiposFuncionario.ObtemTodosTipos();
+                var funcionario = _repositorioFuncionarios.ObtemFuncionario(id);
+
                 Contract.Assume(funcionario.Versao == versao);
+
                 var ct = ObtemContacto(contacto);
                 Contract.Assume(ct != null);
                 funcionario.Contactos.Add(ct);
-                var tipos = _session.QueryOver<TipoFuncionario>().List<TipoFuncionario>();
+
                 tran.Commit();
                 return View("fichafuncionario", new DadosFichaFormulario {
                     ENovo = false,
@@ -184,18 +181,18 @@ namespace site.Controllers {
 
         public ActionResult EliminaContacto(int id, int versao, string contacto) {
             using (var tran = _session.BeginTransaction()) {
+                var tipos = _repositorioTiposFuncionario.ObtemTodosTipos();
                 var funcionario = _session.Load<Funcionario>(id);
-                Contract.Assume( funcionario != null && funcionario.Versao == versao);
+                Contract.Assume(funcionario != null && funcionario.Versao == versao);
 
                 for (var i = 0; i < funcionario.Contactos.Count; i++) {
                     var ct = funcionario.Contactos[i];
                     if (ct.Valor == contacto) {
                         funcionario.Contactos.RemoveAt(i);
                         break;
-                    } 
+                    }
                 }
-                _session.SaveOrUpdate(funcionario);
-                var tipos = _session.QueryOver<TipoFuncionario>().List<TipoFuncionario>();
+    
                 tran.Commit();
                 return View("fichafuncionario", new DadosFichaFormulario {
                     ENovo = false,
@@ -205,15 +202,13 @@ namespace site.Controllers {
             }
         }
 
-        private bool ENif(string nomeOuNif) {
-            return _nifRegex.IsMatch(nomeOuNif);
-        }
 
         [ContractInvariantMethod]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic",
             Justification = "Required for code contracts.")]
         private void ObjectInvariant() {
             Contract.Invariant(_session != null);
+            Contract.Invariant(_repositorioFuncionarios != null);
         }
     }
 }

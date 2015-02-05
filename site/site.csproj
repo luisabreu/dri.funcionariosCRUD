@@ -182,6 +182,9 @@
     <Compile Include="Models\NHibernate\MapeamentoTipoFuncionario.cs" />
     <Compile Include="Models\ViewModel\DadosFichaFormulario.cs" />
     <Compile Include="Models\ViewModel\DadosPesquisa.cs" />
+    <Compile Include="Models\ViewModel\RepositorioFuncionarios.cs" />
+    <Compile Include="Models\ViewModel\RepositorioTiposFuncionario.cs" />
+    <Compile Include="Models\ViewModel\VerificadorNif.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

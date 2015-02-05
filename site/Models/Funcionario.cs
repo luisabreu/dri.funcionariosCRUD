@@ -10,6 +10,16 @@ namespace site.Models {
         public IList<Contacto> Contactos { get; set; }
         public TipoFuncionario TipoFuncionario { get; set; }
 
+        public static Funcionario CriaVazio(TipoFuncionario tipo) {
+            return new Funcionario {
+                    Contactos = new List<Contacto>(),
+                    IdFuncionario = 0,
+                    Nif = "",
+                    Nome = "",
+                    TipoFuncionario = tipo,
+                    Versao = 0
+                };
+        }
     }
 
     public class Contacto {
