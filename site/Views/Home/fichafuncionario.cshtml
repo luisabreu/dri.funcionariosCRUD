@@ -1,0 +1,83 @@
+﻿@model site.Models.ViewModel.DadosFichaFormulario
+<fieldset>
+    <legend>Dados gerais</legend>
+    @using (Html.BeginForm("dadosgerais", "Home", FormMethod.Post, new {@class = "form-horizontal"})) {
+        <input type="hidden" name="id" value="@Model.Funcionario.IdFuncionario"/>
+        <input type="hidden" name="versao" value="@Model.Funcionario.Versao"/>
+        <div class="form-group">
+            <label for="nome" class="control-label col-xs-2">Nome:</label>
+            <div class="col-xs-10 more-space">
+                @Html.TextBox("nome", Model.Funcionario.Nome, new {@class = "form-control", placeholder = "Introduza o nome"})
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="nif" class="control-label col-xs-2">NIF:</label>
+            <div class="col-xs-4">
+                @Html.TextBox("nif", Model.Funcionario.Nif,
+                    new {@class = "form-control", placeholder = "Introduza o NIF"})
+            </div>
+
+            <label for="nif" class="control-label col-xs-2">Tipo:</label>
+            <div class="col-xs-4 more-space">
+                @Html.DropDownList("tipoFuncionario",
+                    new SelectList(Model.TiposFuncionario, "Id", "Descricao", Model.Funcionario.TipoFuncionario.Id),
+                    new {@class = "form-control"})
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-xs-1 col-sm-offset-11">
+                <button type="submit" class="btn btn-sm ">
+                    <span class="glyphicon glyphicon-floppy-disk"></span> </button>
+            </div>
+        </div>
+    }
+</fieldset>
+<fieldset @{
+              if (Model.ENovo) {
+                  <text>disabled="disabled"</text>
+              }
+          }>
+    <legend>Contactos</legend>
+    @using (Html.BeginForm("adicionacontacto", "Home", FormMethod.Post, new {@class = "form-horizontal"})) {
+        <input type="hidden" name="id" value="@Model.Funcionario.IdFuncionario"/>
+        <input type="hidden" name="versao" value="@Model.Funcionario.Versao"/>
+        <div class="form-group">
+            <label for="contacto" class="control-label col-xs-2">Contacto:</label>
+            <div class="col-xs-9">
+                @Html.TextBox("contacto", "", new {@class = "form-control", placeholder = "Introduza o contacto"})
+            </div>
+            <div class="col-xs-1">
+                <button type="submit" class="btn btn-sm">
+                    <span class="glyphicon glyphicon-circle-arrow-down"></span></button>
+            </div>
+        </div>
+    }
+    <table class="table">
+        <thead>
+        <tr>
+            <th class="col-xs-8">Contacto</th>
+            <th class="col-xs-3">Tipo</th>
+            <th class="col-xs-1"></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var contacto in Model.Funcionario.Contactos) {
+            <tr>
+                <td>@contacto.Valor</td>
+                <td>@contacto.TipoContacto</td>
+                <td>
+                    @using (Html.BeginForm("eliminacontacto", "Home")) {
+                        <input type="hidden" name="id" value="@Model.Funcionario.IdFuncionario"/>
+                        <input type="hidden" name="versao" value="@Model.Funcionario.Versao"/>
+                        <input type="hidden" name="contacto" value="@contacto.Valor"/>
+                        <button type="submit" class="btn btn-sm">
+                            <span class="glyphicon glyphicon-trash"></span> </button>
+                    }
+                </td>
+            </tr>
+        }
+
+        </tbody>
+    </table>
+    @Html.ValidationSummary()
+</fieldset>

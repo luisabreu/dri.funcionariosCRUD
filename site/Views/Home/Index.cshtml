@@ -1,0 +1,46 @@
+﻿@model site.Models.ViewModel.DadosPesquisa
+@{
+    ViewBag.Title = "Home Page";
+}
+<div class="row">
+    <form class="form-inline" action="@Url.Action("Index", "Home")">
+        <div class="input-group">
+            <div class="input-group-addon"><span class="glyphicon glyphicon-search"></span></div>
+            <input autofocus="autofocus" type="text" class="form-control"
+                   id="nifOuNome" name="nifOuNome"
+                   value="@Model.NifOuNome"
+                   placeholder="Introduza nome ou NIF a pesquisar">
+        </div>
+    </form>
+</div>
+<div class="row">
+    @Html.ActionLink("Adicionar novo funcionário...", "NovoFuncionario", "Home")
+</div>
+<div class="row"></div>
+@if (Model.PesquisaEfetuada) {
+    if (Model.Funcionarios.Any()) {
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <td class="col-xs-1"></td>
+                <td class="col-xs-1">Id</td>
+                <td class="col-xs-4">Nome</td>
+                <td class="col-xs-4">Nif</td>
+                <td class="col-xs-2">Tipo</td>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var funcionario in Model.Funcionarios) {
+                <td><a href="@Url.Action("FichaFuncionario", "Home", new{ id = funcionario.IdFuncionario})"><span class="glyphicon glyphicon-pencil"></span></a></td>
+                <td>@funcionario.IdFuncionario</td>
+                <td>@funcionario.Nome</td>
+                <td>@funcionario.Nif</td>
+                <td>@funcionario.TipoFuncionario.Descricao</td>
+            }
+            </tbody>
+        </table>
+    }
+    else {
+        <p class="text-center text-success">Não foi encontrado nenhum funcionário.</p>
+    }
+}
