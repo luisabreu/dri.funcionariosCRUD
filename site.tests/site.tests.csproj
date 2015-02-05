@@ -143,6 +143,7 @@
     <Compile Include="Models\NHibernate\MapeamentoFuncionario.cs" />
     <Compile Include="Models\NHibernate\MapeamentoTipoFuncionario.cs" />
     <Compile Include="Models\ViewModel\FuncionalidadesRepositorioFuncionarios.cs" />
+    <Compile Include="Models\ViewModel\FuncionalidadesVerificadorNif.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
